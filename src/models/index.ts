@@ -103,6 +103,8 @@ class Database {
       await import('./content/OtpModel');
       // Dua model
       await import('./content/DuaModel');
+      // PDF Index model
+      await import('./content/PdfIndexModel');
 
       // Note: alter: true disabled due to Sequelize bug with ENUM columns
       // Use migrations for schema changes instead
@@ -162,6 +164,8 @@ export { default as RaahbarBookModel } from './content/RaahbarBookModel';
 export { default as OtpModel } from './content/OtpModel';
 // Dua model
 export { default as DuaModel } from './content/DuaModel';
+// PDF Index model
+export { default as PdfIndexModel } from './content/PdfIndexModel';
 // Pillar of Islam model
 export { default as PillarOfIslamModel } from './content/PillarOfIslamModel';
 
@@ -177,6 +181,7 @@ import RaahbarBookModel from './content/RaahbarBookModel';
 import OtpModel from './content/OtpModel';
 import DuaModel from './content/DuaModel';
 import PillarOfIslamModel from './content/PillarOfIslamModel';
+import PdfIndexModel from './content/PdfIndexModel';
 
 export { PayamModel as Payam, QuranModel as Quran, UserModel as User };
 export { SurahModel as Surah, ParahModel as Parah, AyahModel as Ayah, AyahTranslationModel as AyahTranslation };
@@ -184,6 +189,7 @@ export { RaahbarBookModel as RaahbarBook };
 export { OtpModel as Otp };
 export { DuaModel as Dua };
 export { PillarOfIslamModel as PillarOfIslam };
+export { PdfIndexModel as PdfIndex };
 
 // Export types
 export type { PayamAttributes, PayamCreationAttributes } from './content/PayamModel';
@@ -197,6 +203,7 @@ export type { RaahbarBookAttributes, RaahbarBookCreationAttributes } from './con
 export type { OtpAttributes, OtpCreationAttributes } from './content/OtpModel';
 export type { DuaAttributes, DuaCreationAttributes } from './content/DuaModel';
 export type { PillarOfIslamAttributes, PillarOfIslamCreationAttributes } from './content/PillarOfIslamModel';
+export type { PdfIndexAttributes, PdfIndexCreationAttributes } from './content/PdfIndexModel';
 
 // Model map for dynamic access
 export const models = {
@@ -211,6 +218,7 @@ export const models = {
   OtpModel,
   DuaModel,
   PillarOfIslamModel,
+  PdfIndexModel,
   // Aliases
   Payam: PayamModel,
   Quran: QuranModel,

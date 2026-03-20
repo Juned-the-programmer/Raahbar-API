@@ -7,6 +7,7 @@ import duaRoutes from './dua.routes';
 import pillarOfIslamRoutes from './pillarOfIslam.routes';
 import dashboardRoutes from './dashboard.routes';
 import bookRoutes from './book.routes';
+import pdfIndexRoutes from './pdfIndex.routes';
 
 async function routes(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   // Register Auth routes
@@ -32,6 +33,9 @@ async function routes(fastify: FastifyInstance, opts: FastifyPluginOptions) {
 
   // Register Book routes
   fastify.register(bookRoutes, { prefix: '/api/book' });
+
+  // Register PDF Index routes
+  fastify.register(pdfIndexRoutes, { prefix: '/api/pdf-index' });
 }
 
 export default routes;
