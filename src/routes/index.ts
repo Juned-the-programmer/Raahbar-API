@@ -6,6 +6,7 @@ import raahbarRoutes from './raahbar.routes';
 import duaRoutes from './dua.routes';
 import pillarOfIslamRoutes from './pillarOfIslam.routes';
 import dashboardRoutes from './dashboard.routes';
+import bookRoutes from './book.routes';
 
 async function routes(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   // Register Auth routes
@@ -28,6 +29,9 @@ async function routes(fastify: FastifyInstance, opts: FastifyPluginOptions) {
 
   // Register Dashboard routes
   fastify.register(dashboardRoutes, { prefix: '/api/dashboard' });
+
+  // Register Book routes
+  fastify.register(bookRoutes, { prefix: '/api/book' });
 }
 
 export default routes;
