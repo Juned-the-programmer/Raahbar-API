@@ -4,12 +4,28 @@ import { RaahbarBook, RaahbarBookCreationAttributes, sequelize } from '../../mod
 import { NotFound, BadRequest } from '../../libs/error';
 import { AuthenticatedRequest } from '../../middlewares/authMiddleware';
 import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
-import { saveUploadedFile, saveUploadedThumbnail, deleteUploadedFile, UploadedFile } from '../../utils/file-handler';
+import { uploadToSupabase, deleteFromSupabase, getSignedUrl, UploadedFile } from '../../utils/file-handler';
+import { BUCKETS } from '../../libs/supabase';
 
-const access = promisify(fs.access);
-const stat = promisify(fs.stat);
+// Helper to process book URLs with Signed URLs for Supabase paths
+const processBookUrls = async (book: any) => {
+    if (book.pdfUrl && !book.pdfUrl.startsWith('http')) {
+        try {
+            book.pdfUrl = await getSignedUrl(BUCKETS.RAAHBAR, book.pdfUrl);
+        } catch (e) {
+            // Log but don't fail, fallback to stored path
+            console.error('Failed to sign PDF URL', e);
+        }
+    }
+    if (book.thumbnailUrl && !book.thumbnailUrl.startsWith('http')) {
+        try {
+            book.thumbnailUrl = await getSignedUrl(BUCKETS.RAAHBAR, book.thumbnailUrl);
+        } catch (e) {
+            console.error('Failed to sign Thumbnail URL', e);
+        }
+    }
+    return book;
+};
 
 export interface ListBooksQuery {
     page?: number;
@@ -78,6 +94,10 @@ export async function listBooks(request: FastifyRequest, reply: FastifyReply) {
             order: [['book_number', 'DESC']],
         });
 
+        if (latestBook) {
+            await processBookUrls(latestBook);
+        }
+
         return reply.send({
             success: true,
             data: {
@@ -121,6 +141,7 @@ export async function listBooks(request: FastifyRequest, reply: FastifyReply) {
     const booksByMonth: { [key: string]: { month: number; monthName: string; books: typeof books } } = {};
 
     for (const book of books) {
+        await processBookUrls(book);
         const monthKey = book.hijriMonth?.toString() || 'unknown';
         if (!booksByMonth[monthKey]) {
             booksByMonth[monthKey] = {
@@ -177,6 +198,8 @@ export async function getBook(request: FastifyRequest, reply: FastifyReply) {
         throw new NotFound('Book not found');
     }
 
+    await processBookUrls(book);
+
     return reply.send({
         success: true,
         data: book,
@@ -198,6 +221,8 @@ function parseOptionalInt(value: string | undefined): number | undefined {
 export async function createBook(request: FastifyRequest, reply: FastifyReply) {
     let body: CreateBookInput;
 
+    request.log.info({ contentType: request.headers['content-type'], isMultipart: request.isMultipart() }, 'Create book request received');
+
     if (request.isMultipart()) {
         const parts = request.parts();
         const fields: Record<string, string> = {};
@@ -207,10 +232,17 @@ export async function createBook(request: FastifyRequest, reply: FastifyReply) {
         for await (const part of parts) {
             if (part.type === 'file') {
                 const name = part.fieldname;
+                const buffer = await part.toBuffer();
+                const filename = `${Date.now()}-${part.filename}`;
+                
                 if (name === 'pdf' || name === 'file') {
-                    pdfFile = await saveUploadedFile(part, 'raahbar');
+                    const storagePath = `books/${filename}`;
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
+                    pdfFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else if (name === 'thumbnail') {
-                    thumbFile = await saveUploadedThumbnail(part);
+                    const storagePath = `thumbnails/${filename}`;
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
+                    thumbFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else {
                     throw new BadRequest(`Unexpected file field "${name}". Use "pdf" (or "file") and optionally "thumbnail".`);
                 }
@@ -251,8 +283,13 @@ export async function createBook(request: FastifyRequest, reply: FastifyReply) {
         };
     } else {
         body = request.body as CreateBookInput;
-        if (body.bookNumber == null || !String(body.title ?? '').trim() || !body.pdfUrl) {
-            throw new BadRequest('bookNumber, title, and pdfUrl are required');
+        const missingFields = [];
+        if (body.bookNumber == null) missingFields.push('bookNumber');
+        if (!String(body.title ?? '').trim()) missingFields.push('title');
+        if (!body.pdfUrl) missingFields.push('pdfUrl');
+
+        if (missingFields.length > 0) {
+            throw new BadRequest(`Missing required fields: ${missingFields.join(', ')}. Note: This error occured because the request was NOT recognized as multipart/form-data. If you are uploading a file, ensure your Content-Type is set correctly.`);
         }
     }
 
@@ -311,10 +348,17 @@ export async function updateBook(request: FastifyRequest, reply: FastifyReply) {
         for await (const part of parts) {
             if (part.type === 'file') {
                 const name = part.fieldname;
+                const buffer = await part.toBuffer();
+                const filename = `${Date.now()}-${part.filename}`;
+
                 if (name === 'pdf' || name === 'file') {
-                    newPdfFile = await saveUploadedFile(part, 'raahbar');
+                    const storagePath = `books/${filename}`;
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
+                    newPdfFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else if (name === 'thumbnail') {
-                    newThumbFile = await saveUploadedThumbnail(part);
+                    const storagePath = `thumbnails/${filename}`;
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
+                    newThumbFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else {
                     throw new BadRequest(`Unexpected file field "${name}". Use "pdf" (or "file") and optionally "thumbnail".`);
                 }
@@ -361,12 +405,12 @@ export async function updateBook(request: FastifyRequest, reply: FastifyReply) {
         }
     }
 
-    // If uploading new files, delete the old ones
-    if (newPdfFile && book.pdfUrl) {
-        try { await deleteUploadedFile(book.pdfUrl); } catch (e) {}
+    // If uploading new files, delete the old ones from Supabase
+    if (newPdfFile && book.pdfUrl && !book.pdfUrl.startsWith('http')) {
+        await deleteFromSupabase(BUCKETS.RAAHBAR, book.pdfUrl);
     }
-    if (newThumbFile && book.thumbnailUrl) {
-        try { await deleteUploadedFile(book.thumbnailUrl); } catch (e) {}
+    if (newThumbFile && book.thumbnailUrl && !book.thumbnailUrl.startsWith('http')) {
+        await deleteFromSupabase(BUCKETS.RAAHBAR, book.thumbnailUrl);
     }
 
     // Update fields
@@ -415,6 +459,13 @@ export async function deleteBook(request: FastifyRequest, reply: FastifyReply) {
     const book = await RaahbarBook.findByPk(id);
     if (!book) {
         throw new NotFound('Book not found');
+    }
+
+    if (book.pdfUrl && !book.pdfUrl.startsWith('http')) {
+        await deleteFromSupabase(BUCKETS.RAAHBAR, book.pdfUrl);
+    }
+    if (book.thumbnailUrl && !book.thumbnailUrl.startsWith('http')) {
+        await deleteFromSupabase(BUCKETS.RAAHBAR, book.thumbnailUrl);
     }
 
     await book.destroy(); // Soft delete due to paranoid: true
@@ -483,30 +534,18 @@ export async function downloadBook(request: FastifyRequest, reply: FastifyReply)
         throw new NotFound('Book not found');
     }
 
-    // Get the file path from the book's pdfUrl
-    const filename = path.basename(book.pdfUrl);
-    const filePath = path.join(process.cwd(), 'uploads', 'raahbar', filename);
-
-    try {
-        // Check if file exists and is accessible
-        await access(filePath, fs.constants.F_OK);
-        const fileStat = await stat(filePath);
-
-        // Set appropriate headers for file download
-        reply.header('Content-Type', 'application/pdf');
-        reply.header('Content-Length', fileStat.size);
-
-        // Set Content-Disposition header to force download or inline view
-        const disposition = download === 'true' ? 'attachment' : 'inline';
-        reply.header('Content-Disposition', `${disposition}; filename="${filename}"`);
-
-        // Stream the file
-        const stream = fs.createReadStream(filePath);
-        return reply.send(stream);
-    } catch (error) {
-        console.error('Error serving file:', error);
-        throw new NotFound('File not found or inaccessible');
+    // Generate a signed URL for download
+    if (book.pdfUrl && !book.pdfUrl.startsWith('http')) {
+        const signedUrl = await getSignedUrl(BUCKETS.RAAHBAR, book.pdfUrl);
+        return reply.redirect(signedUrl);
     }
+
+    // Fallback if somehow it's a direct URL or local (local handling omitted for brevity/migration)
+    if (book.pdfUrl && book.pdfUrl.startsWith('http')) {
+        return reply.redirect(book.pdfUrl);
+    }
+
+    throw new NotFound('PDF file not found');
 }
 
 /**

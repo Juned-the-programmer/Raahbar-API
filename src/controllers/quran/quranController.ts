@@ -1,9 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { Op, WhereOptions } from 'sequelize';
+import { uploadToSupabase, getSignedUrl } from '../../utils/file-handler';
+import { BUCKETS } from '../../libs/supabase';
+import { BadRequest, NotFound } from '../../libs/error';
 import {
   SurahModel, ParahModel, AyahModel, AyahTranslationModel, sequelize,
 } from '../../models';
-import { NotFound, BadRequest } from '../../libs/error';
 import {
   CreateSurahInput, UpdateSurahInput,
   CreateParahInput, UpdateParahInput,
@@ -555,7 +557,7 @@ export async function updateAyah(
 
   // Handle surah/parah ID resolution if they are being updated
   const updateData: any = { ...body };
-  
+
   if (body.surahNumber !== undefined) {
     const surah = await SurahModel.findOne({ where: { surahNumber: body.surahNumber, isActive: true } });
     if (!surah) throw new BadRequest(`Surah ${body.surahNumber} not found.`);
@@ -589,4 +591,54 @@ export async function deleteAyah(
   await ayah.destroy();
 
   return reply.send({ success: true, message: `Ayah ${ayahNumber} deleted successfully` });
+}
+
+// ==================== QURAN PDF HANDLERS ====================
+
+/**
+ * Upload the global Quran PDF (Admin only)
+ * This overwrites the existing quran.pdf in the quran bucket
+ */
+export async function uploadQuranPdf(request: FastifyRequest, reply: FastifyReply) {
+  if (!request.isMultipart()) {
+    throw new BadRequest('Request must be multipart/form-data');
+  }
+
+  const parts = request.parts();
+  let uploaded = false;
+
+  for await (const part of parts) {
+    if (part.type === 'file' && (part.fieldname === 'pdf' || part.fieldname === 'file')) {
+      if (part.mimetype !== 'application/pdf' && !part.filename.toLowerCase().endsWith('.pdf')) {
+        throw new BadRequest('Only PDF files are allowed');
+      }
+      
+      const buffer = await part.toBuffer();
+      await uploadToSupabase(BUCKETS.QURAN, 'Quran/quran.pdf', buffer, part.mimetype);
+      uploaded = true;
+      break;
+    }
+  }
+
+  if (!uploaded) {
+    throw new BadRequest('No PDF file uploaded. Please upload the file using the "pdf" field.');
+  }
+
+  return reply.status(201).send({
+    success: true,
+    message: 'Quran PDF uploaded successfully to Supabase',
+  });
+}
+
+/**
+ * Download the global Quran PDF
+ * Generates a signed URL and redirects the user
+ */
+export async function downloadQuranPdf(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    const signedUrl = await getSignedUrl(BUCKETS.QURAN, 'Quran/quran.pdf');
+    return reply.redirect(signedUrl);
+  } catch (error) {
+    throw new NotFound('Quran PDF has not been uploaded yet or is inaccessible');
+  }
 }

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import * as authController from '../controllers/auth/authController';
-import { sendOtpSchema, verifyOtpSchema, updateProfileSchema } from '../controllers/auth/schema';
+import { sendOtpSchema, verifyOtpSchema, updateProfileSchema, updateUserSchema } from '../controllers/auth/schema';
 import { verifyToken, requireAdmin } from '../middlewares/authMiddleware';
 
 async function authRoutes(fastify: FastifyInstance, opts: FastifyPluginOptions) {
@@ -34,6 +34,19 @@ async function authRoutes(fastify: FastifyInstance, opts: FastifyPluginOptions) 
 
     // GET /auth/users - List all users (admin only)
     fastify.get('/users', { preHandler: requireAdmin, schema: { tags: ['Auth'] } }, authController.listUsers);
+
+    // GET /auth/users/:id - Get specific user (admin only)
+    fastify.get('/users/:id', { preHandler: requireAdmin, schema: { tags: ['Auth'] } }, authController.getUserById);
+
+    // PUT /auth/users/:id - Update specific user (admin only)
+    fastify.put(
+        '/users/:id',
+        { preHandler: requireAdmin, schema: { ...updateUserSchema, tags: ['Auth'] } },
+        authController.updateUser
+    );
+
+    // DELETE /auth/users/:id - Delete any user (admin only)
+    fastify.delete('/users/:id', { preHandler: requireAdmin, schema: { tags: ['Auth'] } }, authController.deleteUser);
 }
 
 export default authRoutes;

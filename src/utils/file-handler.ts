@@ -1,7 +1,9 @@
 import fs from 'fs/promises';
+import { createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { MultipartFile } from '@fastify/multipart';
+import { supabase } from '../libs/supabase';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '10485760', 10);
@@ -148,4 +150,56 @@ export async function deleteUploadedFile(filePath: string): Promise<void> {
 export function getRelativePath(absolutePath: string): string {
   const uploadDir = path.resolve(UPLOAD_DIR);
   return path.relative(uploadDir, absolutePath);
+}
+
+/**
+ * Upload a file buffer to Supabase Storage
+ */
+export async function uploadToSupabase(
+  bucket: string,
+  filePath: string,
+  fileBuffer: Buffer,
+  contentType: string
+): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(filePath, fileBuffer, {
+      contentType,
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(`Supabase upload failed: ${error.message}`);
+  }
+
+  return data.path;
+}
+
+/**
+ * Generate a signed URL for a file in Supabase Storage
+ */
+export async function getSignedUrl(
+  bucket: string,
+  filePath: string,
+  expiresIn: number = 3600 // 1 hour default
+): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(filePath, expiresIn);
+
+  if (error) {
+    throw new Error(`Failed to generate signed URL: ${error.message}`);
+  }
+
+  return data.signedUrl;
+}
+
+/**
+ * Delete a file from Supabase Storage
+ */
+export async function deleteFromSupabase(bucket: string, filePath: string): Promise<void> {
+  const { error } = await supabase.storage.from(bucket).remove([filePath]);
+  if (error) {
+    console.error(`Failed to delete file from Supabase: ${error.message}`);
+  }
 }

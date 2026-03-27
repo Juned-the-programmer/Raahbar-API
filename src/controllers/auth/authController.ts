@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { User, Otp, UserCreationAttributes, OtpCreationAttributes } from '../../models';
 import { generateToken, AuthenticatedRequest } from '../../middlewares/authMiddleware';
-import { BadRequest, Unauthorized, Conflict } from '../../libs/error';
-import { SendOtpInput, VerifyOtpInput, UpdateProfileInput } from './schema';
+import { BadRequest, Unauthorized, Conflict, NotFound } from '../../libs/error';
+import { SendOtpInput, VerifyOtpInput, UpdateProfileInput, UpdateUserInput } from './schema';
 
 // Static OTP for development (replace with SMS service in production)
 const STATIC_OTP = '1234';
@@ -220,5 +220,100 @@ export async function updateProfile(request: FastifyRequest, reply: FastifyReply
     return reply.send({
         success: true,
         data: user.toJSON(),
+    });
+}
+
+/**
+ * Get any user by ID (admin only)
+ */
+export async function getUserById(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+        throw new NotFound('User not found');
+    }
+
+    return reply.send({
+        success: true,
+        data: user.toJSON(),
+    });
+}
+
+/**
+ * Update any user by ID (admin only)
+ */
+export async function updateUser(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+    const body = request.body as UpdateUserInput;
+    const { name, email, phone, village, age, gender, bloodGroup, currentLocation, occupation, role, isActive } = body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+        throw new NotFound('User not found');
+    }
+
+    // Update profile fields
+    if (name !== undefined) user.name = name;
+    if (village !== undefined) user.village = village;
+    if (age !== undefined) user.age = age;
+    if (gender !== undefined) user.gender = gender;
+    if (bloodGroup !== undefined) user.bloodGroup = bloodGroup;
+    if (currentLocation !== undefined) user.currentLocation = currentLocation;
+    if (occupation !== undefined) user.occupation = occupation;
+
+    // Admin specific fields
+    if (role !== undefined) user.role = role;
+    if (isActive !== undefined) user.isActive = isActive;
+
+    if (phone !== undefined) {
+        // Check if phone is already taken
+        const existingPhoneUser = await User.findOne({ where: { phone } });
+        if (existingPhoneUser && existingPhoneUser.id !== user.id) {
+            throw new Conflict('Phone number already in use');
+        }
+        user.phone = phone;
+    }
+
+    if (email !== undefined) {
+        // Check if email is already taken
+        if (email) {
+            const existingEmailUser = await User.findOne({ where: { email } });
+            if (existingEmailUser && existingEmailUser.id !== user.id) {
+                throw new Conflict('Email already in use');
+            }
+        }
+        user.email = email;
+    }
+
+    await user.save();
+
+    request.log.info({ userId: user.id }, 'User updated by admin');
+
+    return reply.send({
+        success: true,
+        data: user.toJSON(),
+    });
+}
+
+/**
+ * Delete any user by ID (admin only - soft delete)
+ */
+export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+
+    const user = await User.findByPk(id);
+    if (!user) {
+        throw new NotFound('User not found');
+    }
+
+    await user.destroy();
+
+    request.log.info({ userId: id }, 'User deleted by admin');
+
+    return reply.send({
+        success: true,
+        message: 'User deleted successfully',
     });
 }

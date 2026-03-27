@@ -49,6 +49,25 @@ export const updateProfileSchema: FastifySchema = {
     },
 };
 
+export const updateUserSchema: FastifySchema = {
+    body: {
+        type: 'object',
+        properties: {
+            name: { type: 'string', minLength: 1, maxLength: 255 },
+            email: { type: 'string', format: 'email', nullable: true },
+            phone: { type: 'string', minLength: 10, maxLength: 15 },
+            village: { type: 'string', minLength: 1, maxLength: 255 },
+            age: { type: 'integer', minimum: 1, maximum: 150, nullable: true },
+            gender: { type: 'string', enum: ['male', 'female', 'other'] },
+            bloodGroup: { type: 'string', enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], nullable: true },
+            currentLocation: { type: 'string', maxLength: 255, nullable: true },
+            occupation: { type: 'string', maxLength: 255, nullable: true },
+            role: { type: 'string', enum: ['admin', 'user'] },
+            isActive: { type: 'boolean' },
+        },
+    },
+};
+
 export interface SendOtpInput {
     phone: string;
     intent: 'login' | 'signup';
@@ -75,4 +94,10 @@ export interface UpdateProfileInput {
     bloodGroup?: BloodGroup | null;
     currentLocation?: string | null;
     occupation?: string | null;
+}
+
+export interface UpdateUserInput extends UpdateProfileInput {
+    phone?: string;
+    role?: 'admin' | 'user';
+    isActive?: boolean;
 }

@@ -131,6 +131,22 @@ async function quranRoutes(fastify: FastifyInstance, opts: FastifyPluginOptions)
     { schema: { ...updateAyahTranslationSchema, tags: ['Quran - Ayahs'] }, preHandler: requireAdmin },
     quranController.updateAyahTranslation
   );
+
+  // ==================== QURAN PDF ROUTES ====================
+
+  // GET /quran/pdf - Download the Quran PDF
+  fastify.get(
+    '/pdf',
+    { schema: { tags: ['Quran - PDF'] }, preHandler: verifyToken },
+    quranController.downloadQuranPdf
+  );
+
+  // POST /quran/pdf - Upload the Quran PDF (Admin only)
+  fastify.post(
+    '/pdf',
+    { schema: { tags: ['Quran - PDF'] }, preHandler: requireAdmin },
+    quranController.uploadQuranPdf
+  );
 }
 
 export default quranRoutes;

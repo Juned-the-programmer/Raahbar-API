@@ -3,7 +3,6 @@ import payamRoutes from './payam.routes';
 import quranRoutes from './quran.routes';
 import authRoutes from './auth.routes';
 import raahbarRoutes from './raahbar.routes';
-import namazRoutes from './namaz.routes';
 import duaRoutes from './dua.routes';
 import pillarOfIslamRoutes from './pillarOfIslam.routes';
 
@@ -19,9 +18,6 @@ async function routes(fastify: FastifyInstance, opts: FastifyPluginOptions) {
 
   // Register Raahbar routes
   fastify.register(raahbarRoutes, { prefix: '/api/raahbar' });
-
-  // Register Namaz routes
-  fastify.register(namazRoutes, { prefix: '/api/namaz' });
 
   // Register Dua routes
   fastify.register(duaRoutes, { prefix: '/api/dua' });

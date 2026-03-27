@@ -55,7 +55,7 @@ export async function appSetup(): Promise<FastifyInstance> {
       fieldNameSize: 200,
       fieldSize: 1048576, // 1MB text field limit instead of 100 bytes
       fields: 20,
-      fileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760'), // 10MB
+      fileSize: parseInt(process.env.MAX_FILE_SIZE || '52428800'), // Default to 50MB if not in .env
       files: 10,
       headerPairs: 2000,
       parts: 1000,
