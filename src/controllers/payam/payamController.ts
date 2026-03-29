@@ -177,11 +177,11 @@ export async function updatePayam(request: FastifyRequest, reply: FastifyReply) 
   }
 
   // Check if payamNo is being changed and if the new one already exists
-  if (bodyData.payamNo !== undefined && bodyData.payamNo !== existingPayam.payamNo) {
+  if (bodyData.payamNo !== undefined && Number(bodyData.payamNo) !== Number(existingPayam.payamNo)) {
     const duplicatePayam = await Payam.findOne({
       where: { payamNo: bodyData.payamNo },
     });
-    if (duplicatePayam) {
+    if (duplicatePayam && duplicatePayam.id !== existingPayam.id) {
       throw new BadRequest(`Payam number ${bodyData.payamNo} already exists`);
     }
   }

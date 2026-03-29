@@ -27,7 +27,7 @@ export async function ensureUploadDirectory(): Promise<void> {
   }
 
   // Create subdirectories for different content types
-  const subdirs = ['payam', 'quran'];
+  const subdirs = ['payam', 'quran', 'raahbar', path.join('raahbar', 'thumbnails')];
   for (const subdir of subdirs) {
     const subdirPath = path.join(uploadDir, subdir);
     try {
@@ -58,7 +58,10 @@ function generateSafeFilename(originalFilename: string): string {
 /**
  * Save an uploaded file to the appropriate directory
  */
-export async function saveUploadedFile(file: MultipartFile, contentType: 'payam' | 'quran'): Promise<UploadedFile> {
+export async function saveUploadedFile(
+  file: MultipartFile,
+  contentType: 'payam' | 'quran' | 'raahbar'
+): Promise<UploadedFile> {
   const originalFilename = file.filename;
   const mimeType = file.mimetype;
 
@@ -77,6 +80,43 @@ export async function saveUploadedFile(file: MultipartFile, contentType: 'payam'
   await fs.writeFile(targetPath, buffer);
 
   // Get file stats for size
+  const stats = await fs.stat(targetPath);
+
+  return {
+    filename: safeFilename,
+    originalName: originalFilename,
+    path: targetPath,
+    mimeType,
+    size: stats.size,
+  };
+}
+
+const IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+function isImageFile(mimeType: string, filename: string): boolean {
+  const ext = path.extname(filename).toLowerCase();
+  if (IMAGE_MIME.has(mimeType)) return true;
+  return ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
+}
+
+/**
+ * Save an uploaded thumbnail image (Raahbar books) under uploads/raahbar/thumbnails/
+ */
+export async function saveUploadedThumbnail(file: MultipartFile): Promise<UploadedFile> {
+  const originalFilename = file.filename;
+  const mimeType = file.mimetype;
+
+  if (!isImageFile(mimeType, originalFilename)) {
+    throw new Error('Only JPEG, PNG, WebP, or GIF images are allowed for thumbnails');
+  }
+
+  const safeFilename = generateSafeFilename(originalFilename);
+  const uploadDir = path.resolve(UPLOAD_DIR);
+  const targetDir = path.join(uploadDir, 'raahbar', 'thumbnails');
+  const targetPath = path.join(targetDir, safeFilename);
+
+  const buffer = await file.toBuffer();
+  await fs.writeFile(targetPath, buffer);
   const stats = await fs.stat(targetPath);
 
   return {

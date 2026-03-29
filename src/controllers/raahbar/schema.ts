@@ -22,28 +22,35 @@ export const getBookSchema = {
     },
 };
 
-export const createBookSchema = {
-    body: {
-        type: 'object',
-        required: ['bookNumber', 'title', 'pdfUrl'],
-        properties: {
-            bookNumber: { type: 'integer', minimum: 1 },
-            title: { type: 'string', minLength: 1, maxLength: 500 },
-            titleGujarati: { type: 'string', maxLength: 500 },
-            titleArabic: { type: 'string', maxLength: 500 },
-            description: { type: 'string' },
-            descriptionGujarati: { type: 'string' },
-            author: { type: 'string', maxLength: 255 },
-            pdfUrl: { type: 'string', format: 'uri', maxLength: 1000 },
-            thumbnailUrl: { type: 'string', format: 'uri', maxLength: 1000 },
-            totalPages: { type: 'integer', minimum: 1 },
-            fileSize: { type: 'integer', minimum: 0 },
-            publishedDate: { type: 'string', format: 'date' },
-            hijriYear: { type: 'integer', minimum: 1 },
-            hijriMonth: { type: 'integer', minimum: 1, maximum: 12 },
-            hijriMonthName: { type: 'string', maxLength: 50 },
-        },
+/** JSON body when Content-Type is application/json (pdfUrl + thumbnailUrl are remote URIs). */
+export const createBookJsonBodySchema = {
+    type: 'object',
+    required: ['bookNumber', 'title', 'pdfUrl'],
+    properties: {
+        bookNumber: { type: 'integer', minimum: 1 },
+        title: { type: 'string', minLength: 1, maxLength: 500 },
+        titleGujarati: { type: 'string', maxLength: 500 },
+        titleArabic: { type: 'string', maxLength: 500 },
+        description: { type: 'string' },
+        descriptionGujarati: { type: 'string' },
+        author: { type: 'string', maxLength: 255 },
+        pdfUrl: { type: 'string', format: 'uri', maxLength: 1000 },
+        thumbnailUrl: { type: 'string', format: 'uri', maxLength: 1000 },
+        totalPages: { type: 'integer', minimum: 1 },
+        fileSize: { type: 'integer', minimum: 0 },
+        publishedDate: { type: 'string', format: 'date' },
+        hijriYear: { type: 'integer', minimum: 1 },
+        hijriMonth: { type: 'integer', minimum: 1, maximum: 12 },
+        hijriMonthName: { type: 'string', maxLength: 50 },
     },
+};
+
+/**
+ * Route schema: body validation is in the handler (JSON vs multipart).
+ * Multipart: `pdf` file + text fields; optional `thumbnail` image.
+ */
+export const createBookSchema = {
+    consumes: ['application/json', 'multipart/form-data'],
 };
 
 export const updateBookSchema = {

@@ -3,10 +3,10 @@ import { Op, fn, col } from 'sequelize';
 import { RaahbarBook, RaahbarBookCreationAttributes, sequelize } from '../../models';
 import { NotFound, BadRequest } from '../../libs/error';
 import { AuthenticatedRequest } from '../../middlewares/authMiddleware';
-import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
+import { saveUploadedFile, saveUploadedThumbnail, deleteUploadedFile, UploadedFile } from '../../utils/file-handler';
 
 const access = promisify(fs.access);
 const stat = promisify(fs.stat);
@@ -160,11 +160,12 @@ export async function listBooks(request: FastifyRequest, reply: FastifyReply) {
 export async function getBook(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
 
-    // Try to find by book number first (if numeric), then by UUID
+    // Try to find by book number first (if purely numeric), then by UUID
     let book;
-    const bookNumber = parseInt(id, 10);
+    const isNumeric = /^\d+$/.test(id);
 
-    if (!isNaN(bookNumber)) {
+    if (isNumeric) {
+        const bookNumber = parseInt(id, 10);
         book = await RaahbarBook.findOne({ where: { bookNumber, isActive: true } });
     }
 
@@ -182,11 +183,78 @@ export async function getBook(request: FastifyRequest, reply: FastifyReply) {
     });
 }
 
+function parseOptionalInt(value: string | undefined): number | undefined {
+    if (value === undefined || value === '') return undefined;
+    const n = parseInt(value, 10);
+    return Number.isFinite(n) ? n : undefined;
+}
+
 /**
  * Create a new Raahbar book (Admin only)
+ *
+ * - **application/json**: `bookNumber`, `title`, `pdfUrl` (and optional `thumbnailUrl`) must be valid URIs to existing files.
+ * - **multipart/form-data**: `bookNumber`, `title`, and a PDF in field `pdf` (optional `thumbnail` image). Stored paths are saved as `pdfUrl` / `thumbnailUrl`.
  */
 export async function createBook(request: FastifyRequest, reply: FastifyReply) {
-    const body = request.body as CreateBookInput;
+    let body: CreateBookInput;
+
+    if (request.isMultipart()) {
+        const parts = request.parts();
+        const fields: Record<string, string> = {};
+        let pdfFile: UploadedFile | undefined;
+        let thumbFile: UploadedFile | undefined;
+
+        for await (const part of parts) {
+            if (part.type === 'file') {
+                const name = part.fieldname;
+                if (name === 'pdf' || name === 'file') {
+                    pdfFile = await saveUploadedFile(part, 'raahbar');
+                } else if (name === 'thumbnail') {
+                    thumbFile = await saveUploadedThumbnail(part);
+                } else {
+                    throw new BadRequest(`Unexpected file field "${name}". Use "pdf" (or "file") and optionally "thumbnail".`);
+                }
+            } else {
+                fields[part.fieldname] = part.value as string;
+            }
+        }
+
+        if (!pdfFile) {
+            throw new BadRequest('Multipart request must include a PDF file in field "pdf" (or "file")');
+        }
+
+        const bookNumber = parseInt(fields['bookNumber'] ?? '', 10);
+        if (!Number.isFinite(bookNumber) || bookNumber < 1) {
+            throw new BadRequest('Field "bookNumber" must be a positive integer');
+        }
+        const title = fields['title']?.trim();
+        if (!title) {
+            throw new BadRequest('Field "title" is required');
+        }
+
+        body = {
+            bookNumber,
+            title,
+            titleGujarati: fields['titleGujarati'] || undefined,
+            titleArabic: fields['titleArabic'] || undefined,
+            description: fields['description'] || undefined,
+            descriptionGujarati: fields['descriptionGujarati'] || undefined,
+            author: fields['author'] || undefined,
+            pdfUrl: pdfFile.path,
+            thumbnailUrl: thumbFile?.path,
+            totalPages: parseOptionalInt(fields['totalPages']),
+            fileSize: pdfFile.size,
+            publishedDate: fields['publishedDate'] || undefined,
+            hijriYear: parseOptionalInt(fields['hijriYear']),
+            hijriMonth: parseOptionalInt(fields['hijriMonth']),
+            hijriMonthName: fields['hijriMonthName'] || undefined,
+        };
+    } else {
+        body = request.body as CreateBookInput;
+        if (body.bookNumber == null || !String(body.title ?? '').trim() || !body.pdfUrl) {
+            throw new BadRequest('bookNumber, title, and pdfUrl are required');
+        }
+    }
 
     // Check if book number already exists
     const existingBook = await RaahbarBook.findOne({
@@ -231,7 +299,51 @@ export async function createBook(request: FastifyRequest, reply: FastifyReply) {
  */
 export async function updateBook(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
-    const body = request.body as UpdateBookInput;
+    
+    let body: UpdateBookInput;
+    let newPdfFile: UploadedFile | undefined;
+    let newThumbFile: UploadedFile | undefined;
+
+    if (request.isMultipart()) {
+        const parts = request.parts();
+        const fields: Record<string, string> = {};
+
+        for await (const part of parts) {
+            if (part.type === 'file') {
+                const name = part.fieldname;
+                if (name === 'pdf' || name === 'file') {
+                    newPdfFile = await saveUploadedFile(part, 'raahbar');
+                } else if (name === 'thumbnail') {
+                    newThumbFile = await saveUploadedThumbnail(part);
+                } else {
+                    throw new BadRequest(`Unexpected file field "${name}". Use "pdf" (or "file") and optionally "thumbnail".`);
+                }
+            } else {
+                fields[part.fieldname] = part.value as string;
+            }
+        }
+
+        body = {
+            bookNumber: parseOptionalInt(fields['bookNumber']),
+            title: fields['title'],
+            titleGujarati: fields['titleGujarati'],
+            titleArabic: fields['titleArabic'],
+            description: fields['description'],
+            descriptionGujarati: fields['descriptionGujarati'],
+            author: fields['author'],
+            pdfUrl: newPdfFile?.path,
+            thumbnailUrl: newThumbFile?.path,
+            totalPages: parseOptionalInt(fields['totalPages']),
+            fileSize: newPdfFile?.size,
+            publishedDate: fields['publishedDate'],
+            hijriYear: parseOptionalInt(fields['hijriYear']),
+            hijriMonth: parseOptionalInt(fields['hijriMonth']),
+            hijriMonthName: fields['hijriMonthName'],
+            isActive: fields['isActive'] === 'true' ? true : (fields['isActive'] === 'false' ? false : undefined),
+        };
+    } else {
+        body = request.body as UpdateBookInput;
+    }
 
     const book = await RaahbarBook.findByPk(id);
     if (!book) {
@@ -249,6 +361,14 @@ export async function updateBook(request: FastifyRequest, reply: FastifyReply) {
         }
     }
 
+    // If uploading new files, delete the old ones
+    if (newPdfFile && book.pdfUrl) {
+        try { await deleteUploadedFile(book.pdfUrl); } catch (e) {}
+    }
+    if (newThumbFile && book.thumbnailUrl) {
+        try { await deleteUploadedFile(book.thumbnailUrl); } catch (e) {}
+    }
+
     // Update fields
     if (body.bookNumber !== undefined) book.bookNumber = body.bookNumber;
     if (body.title !== undefined) book.title = body.title;
@@ -257,11 +377,20 @@ export async function updateBook(request: FastifyRequest, reply: FastifyReply) {
     if (body.description !== undefined) book.description = body.description;
     if (body.descriptionGujarati !== undefined) book.descriptionGujarati = body.descriptionGujarati;
     if (body.author !== undefined) book.author = body.author;
-    if (body.pdfUrl !== undefined) book.pdfUrl = body.pdfUrl;
-    if (body.thumbnailUrl !== undefined) book.thumbnailUrl = body.thumbnailUrl;
+    if (newPdfFile) {
+        book.pdfUrl = newPdfFile.path;
+        book.fileSize = newPdfFile.size;
+    } else if (body.pdfUrl !== undefined) {
+        book.pdfUrl = body.pdfUrl;
+    }
+    if (newThumbFile) {
+        book.thumbnailUrl = newThumbFile.path;
+    } else if (body.thumbnailUrl !== undefined) {
+        book.thumbnailUrl = body.thumbnailUrl;
+    }
     if (body.totalPages !== undefined) book.totalPages = body.totalPages;
     if (body.fileSize !== undefined) book.fileSize = body.fileSize;
-    if (body.publishedDate !== undefined) book.publishedDate = new Date(body.publishedDate);
+    if (body.publishedDate !== undefined) book.publishedDate = body.publishedDate ? new Date(body.publishedDate) : null;
     if (body.hijriYear !== undefined) book.hijriYear = body.hijriYear;
     if (body.hijriMonth !== undefined) book.hijriMonth = body.hijriMonth;
     if (body.hijriMonthName !== undefined) book.hijriMonthName = body.hijriMonthName;
@@ -304,11 +433,12 @@ export async function deleteBook(request: FastifyRequest, reply: FastifyReply) {
 export async function incrementDownload(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
 
-    // Try to find by book number first (if numeric), then by UUID
+    // Try to find by book number first (if purely numeric), then by UUID
     let book;
-    const bookNumber = parseInt(id, 10);
+    const isNumeric = /^\d+$/.test(id);
 
-    if (!isNaN(bookNumber)) {
+    if (isNumeric) {
+        const bookNumber = parseInt(id, 10);
         book = await RaahbarBook.findOne({ where: { bookNumber, isActive: true } });
     }
 
@@ -338,12 +468,15 @@ export async function downloadBook(request: FastifyRequest, reply: FastifyReply)
 
     // Find the book by ID or book number
     let book;
-    const bookNumber = parseInt(id, 10);
+    const isNumeric = /^\d+$/.test(id);
 
-    if (!isNaN(bookNumber)) {
+    if (isNumeric) {
+        const bookNumber = parseInt(id, 10);
         book = await RaahbarBook.findOne({ where: { bookNumber, isActive: true } });
-    } else {
-        book = await RaahbarBook.findByPk(id);
+    }
+    
+    if (!book) {
+        book = await RaahbarBook.findOne({ where: { id, isActive: true } });
     }
 
     if (!book) {

@@ -1,86 +1,51 @@
 import { FastifySchema } from 'fastify';
 
-// Create Quran Schema
-export const createQuranSchema: FastifySchema = {
+// ==================== SURAH ====================
+
+export const createSurahSchema: FastifySchema = {
   body: {
     type: 'object',
-    required: ['title'],
+    required: ['surahNumber', 'nameArabic', 'nameGujarati', 'nameEnglish', 'revelationType', 'totalAyahs', 'orderInMushaf'],
     properties: {
-      title: { type: 'string', minLength: 1, maxLength: 500 },
-      content: { type: 'string' },
-      contentType: { type: 'string', enum: ['text', 'pdf'], default: 'text' },
       surahNumber: { type: 'integer', minimum: 1, maximum: 114 },
-      surahName: { type: 'string', maxLength: 255 },
-      surahNameArabic: { type: 'string', maxLength: 255 },
-      ayahNumber: { type: 'integer', minimum: 1 },
-      ayahNumberInSurah: { type: 'integer', minimum: 1 },
-      juzNumber: { type: 'integer', minimum: 1, maximum: 30 },
-      arabicText: { type: 'string' },
-      transliteration: { type: 'string' },
-      metadata: { type: 'object' },
-      createdBy: { type: 'string', maxLength: 255 },
+      nameArabic: { type: 'string', minLength: 1, maxLength: 255 },
+      nameGujarati: { type: 'string', minLength: 1, maxLength: 255 },
+      nameEnglish: { type: 'string', minLength: 1, maxLength: 255 },
+      meaningGujarati: { type: 'string', maxLength: 500 },
+      meaningEnglish: { type: 'string', maxLength: 500 },
+      revelationType: { type: 'string', enum: ['meccan', 'medinan'] },
+      totalAyahs: { type: 'integer', minimum: 1 },
+      orderInMushaf: { type: 'integer', minimum: 1, maximum: 114 },
+      rukuCount: { type: 'integer', minimum: 0 },
     },
   },
 };
 
-// Update Quran Schema
-export const updateQuranSchema: FastifySchema = {
+export const updateSurahSchema: FastifySchema = {
+  params: {
+    type: 'object',
+    required: ['surahNumber'],
+    properties: {
+      surahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+    },
+  },
   body: {
     type: 'object',
     properties: {
-      title: { type: 'string', minLength: 1, maxLength: 500 },
-      content: { type: 'string' },
-      contentType: { type: 'string', enum: ['text', 'pdf'] },
-      surahNumber: { type: 'integer', minimum: 1, maximum: 114 },
-      surahName: { type: 'string', maxLength: 255 },
-      surahNameArabic: { type: 'string', maxLength: 255 },
-      ayahNumber: { type: 'integer', minimum: 1 },
-      ayahNumberInSurah: { type: 'integer', minimum: 1 },
-      juzNumber: { type: 'integer', minimum: 1, maximum: 30 },
-      arabicText: { type: 'string' },
-      transliteration: { type: 'string' },
-      metadata: { type: 'object' },
-    },
-  },
-  params: {
-    type: 'object',
-    required: ['id'],
-    properties: {
-      id: { type: 'string', format: 'uuid' },
+      nameArabic: { type: 'string', minLength: 1, maxLength: 255 },
+      nameGujarati: { type: 'string', minLength: 1, maxLength: 255 },
+      nameEnglish: { type: 'string', minLength: 1, maxLength: 255 },
+      meaningGujarati: { type: 'string', maxLength: 500 },
+      meaningEnglish: { type: 'string', maxLength: 500 },
+      revelationType: { type: 'string', enum: ['meccan', 'medinan'] },
+      totalAyahs: { type: 'integer', minimum: 1 },
+      orderInMushaf: { type: 'integer', minimum: 1, maximum: 114 },
+      rukuCount: { type: 'integer', minimum: 0 },
     },
   },
 };
 
-// List Quran Query Schema
-export const listQuranSchema: FastifySchema = {
-  querystring: {
-    type: 'object',
-    properties: {
-      page: { type: 'integer', minimum: 1, default: 1 },
-      pageSize: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-      surahNumber: { type: 'integer', minimum: 1, maximum: 114 },
-      juzNumber: { type: 'integer', minimum: 1, maximum: 30 },
-      search: { type: 'string' },
-      isActive: { type: 'boolean', default: true },
-      sortBy: { type: 'string', enum: ['createdAt', 'surahNumber', 'ayahNumber', 'title'], default: 'surahNumber' },
-      sortOrder: { type: 'string', enum: ['asc', 'desc'], default: 'asc' },
-    },
-  },
-};
-
-// Get Quran by ID Schema
-export const getQuranSchema: FastifySchema = {
-  params: {
-    type: 'object',
-    required: ['id'],
-    properties: {
-      id: { type: 'string', format: 'uuid' },
-    },
-  },
-};
-
-// Get Quran by Surah Schema
-export const getSurahSchema: FastifySchema = {
+export const deleteSurahSchema: FastifySchema = {
   params: {
     type: 'object',
     required: ['surahNumber'],
@@ -90,79 +55,143 @@ export const getSurahSchema: FastifySchema = {
   },
 };
 
-// Delete Quran Schema
-export const deleteQuranSchema: FastifySchema = {
-  params: {
+// ==================== PARAH ====================
+
+export const createParahSchema: FastifySchema = {
+  body: {
     type: 'object',
-    required: ['id'],
+    required: ['parahNumber', 'nameArabic', 'nameGujarati', 'nameEnglish', 'startSurahNumber', 'startAyahNumber', 'endSurahNumber', 'endAyahNumber'],
     properties: {
-      id: { type: 'string', format: 'uuid' },
+      parahNumber: { type: 'integer', minimum: 1, maximum: 30 },
+      nameArabic: { type: 'string', minLength: 1, maxLength: 255 },
+      nameGujarati: { type: 'string', minLength: 1, maxLength: 255 },
+      nameEnglish: { type: 'string', minLength: 1, maxLength: 255 },
+      startSurahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+      startAyahNumber: { type: 'integer', minimum: 1 },
+      endSurahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+      endAyahNumber: { type: 'integer', minimum: 1 },
     },
   },
 };
 
-// TypeScript interfaces for request types
-export interface CreateQuranInput {
-  title: string;
-  content?: string | null;
-  contentType?: 'text' | 'pdf';
-  surahNumber?: number | null;
-  surahName?: string | null;
-  surahNameArabic?: string | null;
-  ayahNumber?: number | null;
-  ayahNumberInSurah?: number | null;
-  juzNumber?: number | null;
-  arabicText?: string | null;
-  transliteration?: string | null;
-  metadata?: Record<string, unknown> | null;
-  createdBy?: string | null;
-}
+export const updateParahSchema: FastifySchema = {
+  params: {
+    type: 'object',
+    required: ['parahNumber'],
+    properties: {
+      parahNumber: { type: 'integer', minimum: 1, maximum: 30 },
+    },
+  },
+  body: {
+    type: 'object',
+    properties: {
+      nameArabic: { type: 'string', minLength: 1, maxLength: 255 },
+      nameGujarati: { type: 'string', minLength: 1, maxLength: 255 },
+      nameEnglish: { type: 'string', minLength: 1, maxLength: 255 },
+      startSurahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+      startAyahNumber: { type: 'integer', minimum: 1 },
+      endSurahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+      endAyahNumber: { type: 'integer', minimum: 1 },
+    },
+  },
+};
 
-export interface UpdateQuranInput {
-  title?: string;
-  content?: string | null;
-  contentType?: 'text' | 'pdf';
-  surahNumber?: number | null;
-  surahName?: string | null;
-  surahNameArabic?: string | null;
-  ayahNumber?: number | null;
-  ayahNumberInSurah?: number | null;
-  juzNumber?: number | null;
-  arabicText?: string | null;
-  transliteration?: string | null;
-  metadata?: Record<string, unknown> | null;
-}
+export const deleteParahSchema: FastifySchema = {
+  params: {
+    type: 'object',
+    required: ['parahNumber'],
+    properties: {
+      parahNumber: { type: 'integer', minimum: 1, maximum: 30 },
+    },
+  },
+};
 
-export interface ListQuranQuery {
-  page?: number;
-  pageSize?: number;
-  surahNumber?: number;
-  juzNumber?: number;
-  search?: string;
-  isActive?: boolean;
-  sortBy?: 'createdAt' | 'surahNumber' | 'ayahNumber' | 'title';
-  sortOrder?: 'asc' | 'desc';
-}
+// ==================== AYAH ====================
 
-export interface IdParam {
-  id: string;
-}
+export const createAyahSchema: FastifySchema = {
+  body: {
+    type: 'object',
+    required: ['surahNumber', 'parahNumber', 'ayahNumber', 'ayahNumberInSurah', 'arabicText'],
+    properties: {
+      surahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+      parahNumber: { type: 'integer', minimum: 1, maximum: 30 },
+      ayahNumber: { type: 'integer', minimum: 1, maximum: 6236 },
+      ayahNumberInSurah: { type: 'integer', minimum: 1 },
+      arabicText: { type: 'string', minLength: 1 },
+      arabicTextSimple: { type: 'string' },
+      pageNumber: { type: 'integer', minimum: 1, maximum: 604 },
+      hizbQuarter: { type: 'integer', minimum: 1, maximum: 240 },
+      sajdaType: { type: 'string', enum: ['none', 'recommended', 'obligatory'] },
+      translations: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['language', 'text'],
+          properties: {
+            language: { type: 'string', enum: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'] },
+            text: { type: 'string', minLength: 1 },
+            translatorName: { type: 'string', maxLength: 255 },
+          },
+        },
+      },
+    },
+  },
+};
 
-export interface SurahParam {
-  surahNumber: number;
-}
+export const updateAyahSchema: FastifySchema = {
+  params: {
+    type: 'object',
+    required: ['ayahNumber'],
+    properties: {
+      ayahNumber: { type: 'integer', minimum: 1, maximum: 6236 },
+    },
+  },
+  body: {
+    type: 'object',
+    properties: {
+      surahNumber: { type: 'integer', minimum: 1, maximum: 114 },
+      parahNumber: { type: 'integer', minimum: 1, maximum: 30 },
+      ayahNumberInSurah: { type: 'integer', minimum: 1 },
+      arabicText: { type: 'string', minLength: 1 },
+      arabicTextSimple: { type: 'string' },
+      pageNumber: { type: 'integer', minimum: 1, maximum: 604 },
+      hizbQuarter: { type: 'integer', minimum: 1, maximum: 240 },
+      sajdaType: { type: 'string', enum: ['none', 'recommended', 'obligatory'] },
+    },
+  },
+};
 
-export interface ParahParam {
-  parahNumber: number;
-}
+export const deleteAyahSchema: FastifySchema = {
+  params: {
+    type: 'object',
+    required: ['ayahNumber'],
+    properties: {
+      ayahNumber: { type: 'integer', minimum: 1, maximum: 6236 },
+    },
+  },
+};
 
-export interface AyahParam {
-  ayahNumber: number;
-}
+export const updateAyahTranslationSchema: FastifySchema = {
+  params: {
+    type: 'object',
+    required: ['ayahNumber', 'language'],
+    properties: {
+      ayahNumber: { type: 'integer', minimum: 1, maximum: 6236 },
+      language: { type: 'string', enum: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'] },
+    },
+  },
+  body: {
+    type: 'object',
+    required: ['text'],
+    properties: {
+      text: { type: 'string', minLength: 1 },
+      translatorName: { type: 'string', maxLength: 255 },
+    },
+  },
+};
 
-// ==================== NEW NORMALIZED QURAN SCHEMAS ====================
+// ==================== GET SCHEMAS ====================
 
-// List Surahs Schema
 export const listSurahsSchema: FastifySchema = {
   querystring: {
     type: 'object',
@@ -172,7 +201,6 @@ export const listSurahsSchema: FastifySchema = {
   },
 };
 
-// Get Surah Details Schema
 export const getSurahDetailsSchema: FastifySchema = {
   params: {
     type: 'object',
@@ -188,13 +216,12 @@ export const getSurahDetailsSchema: FastifySchema = {
       languages: {
         type: 'array',
         items: { type: 'string', enum: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'] },
-        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en']
+        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'],
       },
     },
   },
 };
 
-// List Parahs Schema
 export const listParahsSchema: FastifySchema = {
   querystring: {
     type: 'object',
@@ -202,7 +229,6 @@ export const listParahsSchema: FastifySchema = {
   },
 };
 
-// Get Parah Details Schema
 export const getParahDetailsSchema: FastifySchema = {
   params: {
     type: 'object',
@@ -218,13 +244,12 @@ export const getParahDetailsSchema: FastifySchema = {
       languages: {
         type: 'array',
         items: { type: 'string', enum: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'] },
-        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en']
+        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'],
       },
     },
   },
 };
 
-// List Ayahs Schema
 export const listAyahsSchema: FastifySchema = {
   querystring: {
     type: 'object',
@@ -238,13 +263,12 @@ export const listAyahsSchema: FastifySchema = {
       languages: {
         type: 'array',
         items: { type: 'string', enum: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'] },
-        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en']
+        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'],
       },
     },
   },
 };
 
-// Get Single Ayah Schema
 export const getAyahSchema: FastifySchema = {
   params: {
     type: 'object',
@@ -260,27 +284,81 @@ export const getAyahSchema: FastifySchema = {
       languages: {
         type: 'array',
         items: { type: 'string', enum: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'] },
-        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en']
+        default: ['ar_translit_en', 'ar_translit_gu', 'gu', 'en'],
       },
     },
   },
 };
 
-// TypeScript interfaces for new endpoints
-export interface ListSurahsQuery {
-  revelationType?: 'meccan' | 'medinan';
+// ==================== TYPESCRIPT INTERFACES ====================
+
+export interface CreateSurahInput {
+  surahNumber: number;
+  nameArabic: string;
+  nameGujarati: string;
+  nameEnglish: string;
+  meaningGujarati?: string;
+  meaningEnglish?: string;
+  revelationType: 'meccan' | 'medinan';
+  totalAyahs: number;
+  orderInMushaf: number;
+  rukuCount?: number;
 }
 
+export interface UpdateSurahInput extends Partial<Omit<CreateSurahInput, 'surahNumber'>> { }
+
+export interface CreateParahInput {
+  parahNumber: number;
+  nameArabic: string;
+  nameGujarati: string;
+  nameEnglish: string;
+  startSurahNumber: number;
+  startAyahNumber: number;
+  endSurahNumber: number;
+  endAyahNumber: number;
+}
+
+export interface UpdateParahInput extends Partial<Omit<CreateParahInput, 'parahNumber'>> { }
+
+export interface TranslationInput {
+  language: 'ar_translit_en' | 'ar_translit_gu' | 'gu' | 'en';
+  text: string;
+  translatorName?: string;
+}
+
+export interface CreateAyahInput {
+  surahNumber: number;
+  parahNumber: number;
+  ayahNumber: number;
+  ayahNumberInSurah: number;
+  arabicText: string;
+  arabicTextSimple?: string;
+  pageNumber?: number;
+  hizbQuarter?: number;
+  sajdaType?: 'none' | 'recommended' | 'obligatory';
+  translations?: TranslationInput[];
+}
+
+export interface UpdateAyahInput extends Partial<Omit<CreateAyahInput, 'ayahNumber' | 'translations'>> { }
+
+export interface UpdateAyahTranslationInput {
+  text: string;
+  translatorName?: string;
+}
+
+export interface SurahParam { surahNumber: number; }
+export interface ParahParam { parahNumber: number; }
+export interface AyahParam { ayahNumber: number; }
+export interface AyahTranslationParam { ayahNumber: number; language: string; }
+export interface ListSurahsQuery { revelationType?: 'meccan' | 'medinan'; }
 export interface SurahDetailsQuery {
   includeTranslations?: boolean;
   languages?: ('ar_translit_en' | 'ar_translit_gu' | 'gu' | 'en')[];
 }
-
 export interface ParahDetailsQuery {
   includeTranslations?: boolean;
   languages?: ('ar_translit_en' | 'ar_translit_gu' | 'gu' | 'en')[];
 }
-
 export interface ListAyahsQuery {
   surahNumber?: number;
   parahNumber?: number;
@@ -290,7 +368,6 @@ export interface ListAyahsQuery {
   includeTranslations?: boolean;
   languages?: ('ar_translit_en' | 'ar_translit_gu' | 'gu' | 'en')[];
 }
-
 export interface AyahDetailsQuery {
   includeTranslations?: boolean;
   languages?: ('ar_translit_en' | 'ar_translit_gu' | 'gu' | 'en')[];

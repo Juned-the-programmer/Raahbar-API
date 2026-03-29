@@ -52,9 +52,9 @@ export async function appSetup(): Promise<FastifyInstance> {
   // Register multipart for file uploads
   await app.register(multipart, {
     limits: {
-      fieldNameSize: 100,
-      fieldSize: 100,
-      fields: 10,
+      fieldNameSize: 200,
+      fieldSize: 1048576, // 1MB text field limit instead of 100 bytes
+      fields: 20,
       fileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760'), // 10MB
       files: 10,
       headerPairs: 2000,
