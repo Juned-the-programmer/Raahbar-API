@@ -1,0 +1,1587 @@
+{
+	"info": {
+		"_postman_id": "03a79149-69c3-4450-9156-90bff7a00f69",
+		"name": "RAHBAR API",
+		"description": "API collection for RAHBAR - Religious Content Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13385474",
+		"_collection_link": "https://banas8.postman.co/workspace/Banas-Workspace~836c252d-9a24-46e3-8759-5f5a5ca4846a/collection/13385474-03a79149-69c3-4450-9156-90bff7a00f69?action=share&source=collection_link&creator=13385474"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Send OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"7698530801\",\n    \"intent\": \"login\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/send-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"send-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"7698530801\",\n    \"otp\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payam",
+			"item": [
+				{
+					"name": "List Payams",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payam?page=1&pageSize=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payam"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortBy",
+									"value": "payamNo",
+									"disabled": true
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payam by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payam/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payam",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payam (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payamNo\": 1,\n    \"title\": \"Sample Payam Title\",\n    \"textContent\": \"This is the content of the payam message.\",\n    \"date\": \"2024-01-01\",\n    \"islamicDate\": \"1 Muharram 1446\",\n    \"reference\": \"Sahih Bukhari\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payam",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payam"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Payam (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Payam Title\",\n    \"textContent\": \"Updated content.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payam/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payam",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Payam (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payam/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payam",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Quran - Surahs",
+			"item": [
+				{
+					"name": "List All Surahs",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/surahs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"surahs"
+							],
+							"query": [
+								{
+									"key": "revelationType",
+									"value": "meccan",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Surah Details",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/surahs/:surahNumber?includeTranslations=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"surahs",
+								":surahNumber"
+							],
+							"query": [
+								{
+									"key": "includeTranslations",
+									"value": "true"
+								},
+								{
+									"key": "languages",
+									"value": "ar_translit_en,ar_translit_gu,gu,en",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "surahNumber",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Quran - Parahs",
+			"item": [
+				{
+					"name": "List All Parahs",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/parahs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"parahs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Parah Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/parahs/:parahNumber?includeTranslations=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"parahs",
+								":parahNumber"
+							],
+							"query": [
+								{
+									"key": "includeTranslations",
+									"value": "true"
+								},
+								{
+									"key": "languages",
+									"value": "ar_translit_en,ar_translit_gu,gu,en",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "parahNumber",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Quran - Ayahs",
+			"item": [
+				{
+					"name": "List Ayahs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/ayahs?page=1&pageSize=50",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"ayahs"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "50"
+								},
+								{
+									"key": "surahNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "parahNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "includeTranslations",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ayah by Number",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/ayahs/:ayahNumber?includeTranslations=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"ayahs",
+								":ayahNumber"
+							],
+							"query": [
+								{
+									"key": "includeTranslations",
+									"value": "true"
+								},
+								{
+									"key": "languages",
+									"value": "ar_translit_en,ar_translit_gu,gu,en",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "ayahNumber",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Quran - Legacy",
+			"item": [
+				{
+					"name": "List Quran Entries",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran?page=1&pageSize=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								},
+								{
+									"key": "surahNumber",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "juzNumber",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quran by Surah (Legacy)",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/surah/:surahNumber",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								"surah",
+								":surahNumber"
+							],
+							"variable": [
+								{
+									"key": "surahNumber",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quran by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Quran Entry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Al-Fatiha Ayah 1\",\n    \"content\": \"Bismillahir Rahmanir Raheem\",\n    \"surahNumber\": 1,\n    \"surahName\": \"Al-Fatiha\",\n    \"ayahNumber\": 1,\n    \"ayahNumberInSurah\": 1,\n    \"arabicText\": \"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quran",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Quran Entry",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Title\",\n    \"content\": \"Updated content\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Quran Entry",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/quran/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"quran",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Raahbar Books",
+			"item": [
+				{
+					"name": "List Books",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books"
+							],
+							"query": [
+								{
+									"key": "hijriYear",
+									"value": "1446",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "20",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all books. Without hijriYear: returns latest book and list of available Hijri years. With hijriYear: returns books for that year grouped by month."
+					},
+					"response": []
+				},
+				{
+					"name": "List Books by Hijri Year",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{authToken}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books?hijriYear=1446",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books"
+							],
+							"query": [
+								{
+									"key": "hijriYear",
+									"value": "1446"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-or-book-number"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download Book PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books/:id/download",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books",
+								":id",
+								"download"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-or-book-number"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Increment Download Count",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books/:id/download",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books",
+								":id",
+								"download"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-or-book-number"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Book (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bookNumber\": 1,\n    \"title\": \"Raahbar Issue 1\",\n    \"description\": \"Monthly spiritual guidance\",\n    \"hijriYear\": 1446,\n    \"hijriMonth\": 1,\n    \"hijriMonthName\": \"Muharram\",\n    \"publicationDate\": \"2024-07-01\",\n    \"coverImageUrl\": \"https://example.com/cover.jpg\",\n    \"pdfUrl\": \"https://example.com/book.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Create Books (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"books\": [\n        {\n            \"bookNumber\": 1,\n            \"title\": \"Raahbar Issue 1\",\n            \"hijriYear\": 1446,\n            \"hijriMonth\": 1,\n            \"hijriMonthName\": \"Muharram\"\n        },\n        {\n            \"bookNumber\": 2,\n            \"title\": \"Raahbar Issue 2\",\n            \"hijriYear\": 1446,\n            \"hijriMonth\": 2,\n            \"hijriMonthName\": \"Safar\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books/bulk",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books",
+								"bulk"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Book Title\",\n    \"description\": \"Updated description\",\n    \"hijriYear\": 1446,\n    \"hijriMonth\": 2,\n    \"hijriMonthName\": \"Safar\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/raahbar/books/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"raahbar",
+								"books",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dua",
+			"item": [
+				{
+					"name": "List Duas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dua?page=1&pageSize=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dua"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Dua by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dua/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dua",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Dua (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titleEn\": \"Dua Before Eating\",\n    \"titleGu\": \"ખાવા પહેલાની દુઆ\",\n    \"textAr\": \"بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ\",\n    \"transliterationEn\": \"Bismillahi wa 'ala barakatillah\",\n    \"transliterationGu\": \"બિસ્મિલ્લાહિ વ 'અલા બરકતિલ્લાહ\",\n    \"translationEn\": \"In the name of Allah and with the blessings of Allah\",\n    \"translationGu\": \"અલ્લાહના નામથી અને અલ્લાહની બરકત સાથે\",\n    \"referenceSource\": \"Sunan Ibn Majah\",\n    \"referenceBookName\": \"Ibn Majah\",\n    \"referenceHadithNumber\": \"3264\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/dua",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dua"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Dua (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titleEn\": \"Updated Dua Title\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/dua/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dua",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Dua (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dua/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dua",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pillars of Islam",
+			"item": [
+				{
+					"name": "List Pillars",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/pillars?page=1&pageSize=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pillars"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pillar by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/pillars/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pillars",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Pillar (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titleEn\": \"Shahada – Declaration of Faith\",\n    \"titleGu\": \"શહાદત – ઈમાનની ગવાહી\",\n    \"textAr\": \"لَا إِلٰهَ إِلَّا اللّٰهُ، مُحَمَّدٌ رَسُولُ اللّٰهِ\",\n    \"transliterationEn\": \"La ilaha illallah, Muhammadur Rasulullah\",\n    \"transliterationGu\": \"લા ઇલાહ ઇલ્લલ્લાહ, મુહમ્મદુર રસૂલુલ્લાહ\",\n    \"translationEn\": \"There is no god but Allah, and Muhammad is the Messenger of Allah\",\n    \"translationGu\": \"અલ્લાહ સિવાય કોઈ ઇલાહ નથી અને મુહંમદ ﷺ અલ્લાહના રસૂલ છે\",\n    \"descriptionEn\": \"Shahada is the first and most fundamental pillar of Islam. It is a sincere declaration of faith that affirms belief in the oneness of Allah (Tawheed) and acceptance of Prophet Muhammad ﷺ as His final messenger.\",\n    \"descriptionGu\": \"શહાદત ઇસ્લામનો પ્રથમ અને સૌથી મહત્વપૂર્ણ સ્તંભ છે. તેમાં અલ્લાહની એકતા (તૌહિદ) પર સંપૂર્ણ ઈમાન અને હઝરત મુહંમદ ﷺ ને અલ્લાહના અંતિમ રસૂલ તરીકે સ્વીકારવાનો ઇકરાર શામેલ છે.\",\n    \"referenceSource\": \"Sahih al-Bukhari & Sahih Muslim\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pillars",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pillars"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Pillar (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titleEn\": \"Updated Pillar Title\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pillars/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pillars",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Pillar (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/pillars/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pillars",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "uuid-here"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "authToken",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiNDZjODI0OC04MzgxLTQ5NDEtOTJlOC1jNTg1MTBiYTQ4ZmQiLCJwaG9uZSI6Ijc2OTg1MzA4MDEiLCJyb2xlIjoidXNlciIsImlhdCI6MTc2NzA5OTkzOSwiZXhwIjoxNzY3NzA0NzM5fQ.ZG9IGf3ik4TcOJlHN2IzbEk8dcTtcf2jPuptVHKZQao"
+		}
+	]
+}
