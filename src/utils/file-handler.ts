@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import { createReadStream, createWriteStream } from 'fs';
+import { Readable, Transform, TransformCallback } from 'stream';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { MultipartFile } from '@fastify/multipart';
@@ -153,20 +154,34 @@ export function getRelativePath(absolutePath: string): string {
 }
 
 /**
- * Upload a file buffer to Supabase Storage
+ * A transform stream that counts the number of bytes passed through it.
+ */
+export class ByteCounter extends Transform {
+  public bytesRead = 0;
+
+  _transform(chunk: any, encoding: BufferEncoding, callback: TransformCallback): void {
+    this.bytesRead += chunk.length;
+    this.push(chunk);
+    callback();
+  }
+}
+
+/**
+ * Upload a file (Buffer or Stream) to Supabase Storage
  */
 export async function uploadToSupabase(
   bucket: string,
   filePath: string,
-  fileBuffer: Buffer,
+  fileBody: Buffer | Readable,
   contentType: string
 ): Promise<string> {
   const { data, error } = await supabase.storage
     .from(bucket)
-    .upload(filePath, fileBuffer, {
+    .upload(filePath, fileBody, {
       contentType,
       upsert: true,
-    });
+      duplex: 'half', // Required for streaming in undici/fetch-based environments
+    } as any);
 
   if (error) {
     throw new Error(`Supabase upload failed: ${error.message}`);

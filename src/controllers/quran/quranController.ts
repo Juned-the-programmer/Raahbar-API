@@ -613,8 +613,7 @@ export async function uploadQuranPdf(request: FastifyRequest, reply: FastifyRepl
         throw new BadRequest('Only PDF files are allowed');
       }
       
-      const buffer = await part.toBuffer();
-      await uploadToSupabase(BUCKETS.QURAN, 'Quran/quran.pdf', buffer, part.mimetype);
+      await uploadToSupabase(BUCKETS.QURAN, 'Quran/quran.pdf', part.file, part.mimetype);
       uploaded = true;
       break;
     }

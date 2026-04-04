@@ -4,7 +4,7 @@ import { RaahbarBook, RaahbarBookCreationAttributes, sequelize } from '../../mod
 import { NotFound, BadRequest } from '../../libs/error';
 import { AuthenticatedRequest } from '../../middlewares/authMiddleware';
 import path from 'path';
-import { uploadToSupabase, deleteFromSupabase, getSignedUrl, UploadedFile } from '../../utils/file-handler';
+import { uploadToSupabase, deleteFromSupabase, getSignedUrl, UploadedFile, ByteCounter } from '../../utils/file-handler';
 import { BUCKETS } from '../../libs/supabase';
 
 // Helper to process book URLs with Signed URLs for Supabase paths
@@ -232,17 +232,20 @@ export async function createBook(request: FastifyRequest, reply: FastifyReply) {
         for await (const part of parts) {
             if (part.type === 'file') {
                 const name = part.fieldname;
-                const buffer = await part.toBuffer();
                 const filename = `${Date.now()}-${part.filename}`;
                 
                 if (name === 'pdf' || name === 'file') {
                     const storagePath = `books/${filename}`;
-                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
-                    pdfFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
+                    const counter = new ByteCounter();
+                    const streamedFile = part.file.pipe(counter);
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, streamedFile, part.mimetype);
+                    pdfFile = { path, size: counter.bytesRead, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else if (name === 'thumbnail') {
                     const storagePath = `thumbnails/${filename}`;
-                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
-                    thumbFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
+                    const counter = new ByteCounter();
+                    const streamedFile = part.file.pipe(counter);
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, streamedFile, part.mimetype);
+                    thumbFile = { path, size: counter.bytesRead, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else {
                     throw new BadRequest(`Unexpected file field "${name}". Use "pdf" (or "file") and optionally "thumbnail".`);
                 }
@@ -348,17 +351,20 @@ export async function updateBook(request: FastifyRequest, reply: FastifyReply) {
         for await (const part of parts) {
             if (part.type === 'file') {
                 const name = part.fieldname;
-                const buffer = await part.toBuffer();
                 const filename = `${Date.now()}-${part.filename}`;
 
                 if (name === 'pdf' || name === 'file') {
                     const storagePath = `books/${filename}`;
-                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
-                    newPdfFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
+                    const counter = new ByteCounter();
+                    const streamedFile = part.file.pipe(counter);
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, streamedFile, part.mimetype);
+                    newPdfFile = { path, size: counter.bytesRead, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else if (name === 'thumbnail') {
                     const storagePath = `thumbnails/${filename}`;
-                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, buffer, part.mimetype);
-                    newThumbFile = { path, size: buffer.length, filename, originalName: part.filename, mimeType: part.mimetype };
+                    const counter = new ByteCounter();
+                    const streamedFile = part.file.pipe(counter);
+                    const path = await uploadToSupabase(BUCKETS.RAAHBAR, storagePath, streamedFile, part.mimetype);
+                    newThumbFile = { path, size: counter.bytesRead, filename, originalName: part.filename, mimeType: part.mimetype };
                 } else {
                     throw new BadRequest(`Unexpected file field "${name}". Use "pdf" (or "file") and optionally "thumbnail".`);
                 }

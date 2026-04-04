@@ -24,8 +24,7 @@ export async function uploadHajjPdf(request: FastifyRequest, reply: FastifyReply
                 throw new BadRequest('Only PDF files are allowed');
             }
 
-            const buffer = await part.toBuffer();
-            await uploadToSupabase(BUCKETS.RAAHBAR, HAJJ_PDF_PATH, buffer, part.mimetype);
+            await uploadToSupabase(BUCKETS.RAAHBAR, HAJJ_PDF_PATH, part.file, part.mimetype);
             uploaded = true;
             break;
         }
@@ -70,8 +69,7 @@ export async function uploadPanjsurahPdf(request: FastifyRequest, reply: Fastify
                 throw new BadRequest('Only PDF files are allowed');
             }
 
-            const buffer = await part.toBuffer();
-            await uploadToSupabase(BUCKETS.RAAHBAR, PANJSURAH_PDF_PATH, buffer, part.mimetype);
+            await uploadToSupabase(BUCKETS.RAAHBAR, PANJSURAH_PDF_PATH, part.file, part.mimetype);
             uploaded = true;
             break;
         }
